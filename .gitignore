@@ -22,3 +22,6 @@ screenshots
 # Recorded clips: raw webm scratch is throwaway; the curated mp4/jpg are force-added
 media/.raw
 media
+
+# Personal layout backup for redeploying to Docker/add-on
+my-dashboard-layout.backup.json

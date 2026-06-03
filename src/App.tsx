@@ -224,6 +224,8 @@ export default function App() {
         <SettingsModal
           onClose={() => setShowSettings(false)}
           onResetLayout={layout.resetLayout}
+          onExportLayout={layout.exportLayout}
+          onImportLayout={layout.importLayout}
         />
       )}
 

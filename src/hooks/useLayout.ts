@@ -3,7 +3,9 @@ import { views as defaultViews } from '../config';
 import { withRows } from '../lib/layout';
 import type { DashRow, DashView, GlanceButtonConfig, RoomEntity, TileSize } from '../types';
 
-const ENDPOINT = '/layout';
+// Resolve the layout API relative to the app's base path so it works behind
+// HA Ingress (served under /api/hassio_ingress/<token>/) as well as at root.
+const ENDPOINT = `${import.meta.env.BASE_URL}layout`.replace(/\/\/+/g, '/');
 const SIZE_CYCLE: TileSize[] = ['1x1', '2x1', '1x2', '2x2'];
 
 function clone<T>(v: T): T {
@@ -244,6 +246,30 @@ export function useLayout() {
     fetch(ENDPOINT, { method: 'DELETE' }).finally(() => setSaving(false));
   }, []);
 
+  /** Serialize the current layout to a pretty JSON string (for export/download). */
+  const exportLayout = useCallback(() => {
+    // Strip the derived `rows` so the export matches the on-disk schema.
+    const clean = views.map(({ rows: _rows, ...v }) => v);
+    return JSON.stringify(clean, null, 2);
+  }, [views]);
+
+  /** Replace the entire layout from imported JSON (string or parsed array). */
+  const importLayout = useCallback(
+    (data: string | DashView[]) => {
+      const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        throw new Error('Layout must be a non-empty array of views.');
+      }
+      if (!parsed.every((v) => v && typeof v.id === 'string')) {
+        throw new Error('Each view needs a string "id".');
+      }
+      const next = withRows(parsed as DashView[]);
+      setViews(next);
+      persist(next);
+    },
+    [persist],
+  );
+
   return {
     views,
     loaded,
@@ -265,5 +291,7 @@ export function useLayout() {
     moveScene,
     setGlance,
     resetLayout,
+    exportLayout,
+    importLayout,
   };
 }

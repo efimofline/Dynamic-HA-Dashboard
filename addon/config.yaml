@@ -1,0 +1,20 @@
+name: Dynamic HA Dashboard
+version: "0.8.0"
+slug: dynamic_ha_dashboard
+description: A premium, fully-configurable Home Assistant dashboard with at-a-glance buttons, live tiles, and ambient effects.
+url: https://github.com/jvenuto80/Dynamic-HA-Dashboard
+arch:
+  - aarch64
+  - amd64
+  - armv7
+init: false
+ingress: true
+ingress_port: 3000
+panel_icon: mdi:view-dashboard-variant
+panel_title: Dashboard
+ports:
+  3000/tcp: null
+ports_description:
+  3000/tcp: Web UI (optional — leave empty to use Ingress only)
+options: {}
+schema: {}

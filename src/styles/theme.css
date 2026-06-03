@@ -3902,6 +3902,14 @@ html.vt-active .detail-panel.open > * {
   flex-wrap: wrap;
 }
 
+.settings-data-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+
 .settings-test-msg {
   display: inline-flex;
   align-items: center;

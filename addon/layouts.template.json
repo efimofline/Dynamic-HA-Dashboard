@@ -1,0 +1,49 @@
+[
+  {
+    "id": "main",
+    "name": "Home",
+    "icon": "mdi-home",
+    "glance": [
+      { "id": "g-lights", "metric": "lights", "flyout": true },
+      { "id": "g-climate", "metric": "climate", "flyout": true },
+      { "id": "g-people", "metric": "people", "flyout": true },
+      { "id": "g-media", "metric": "media", "flyout": true }
+    ],
+    "scenes": [
+      "scene.movie_time",
+      "scene.good_morning",
+      "scene.good_night"
+    ],
+    "sections": [
+      {
+        "title": "Lighting",
+        "entities": [
+          { "entity_id": "light.living_room", "name": "Living Room" },
+          { "entity_id": "light.kitchen", "name": "Kitchen" },
+          { "entity_id": "light.bedroom", "name": "Bedroom" },
+          { "entity_id": "light.hallway", "name": "Hallway" }
+        ]
+      },
+      {
+        "title": "Security & Access",
+        "entities": [
+          { "entity_id": "lock.front_door", "name": "Front Door" },
+          { "entity_id": "cover.garage_door", "name": "Garage" },
+          { "entity_id": "cover.living_room_blinds", "name": "Blinds" }
+        ]
+      },
+      {
+        "title": "Climate",
+        "entities": [
+          { "entity_id": "climate.thermostat", "name": "Thermostat" }
+        ]
+      },
+      {
+        "title": "Media",
+        "entities": [
+          { "entity_id": "media_player.living_room", "name": "Living Room" }
+        ]
+      }
+    ]
+  }
+]

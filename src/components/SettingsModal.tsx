@@ -11,15 +11,18 @@ import {
   ACCENT_SWATCHES,
   type ThemeId,
 } from '../settings';
+import type { DashView } from '../types';
 
 interface Props {
   onClose: () => void;
   onResetLayout: () => void;
+  onExportLayout: () => string;
+  onImportLayout: (data: string | DashView[]) => void;
 }
 
 type TestState = 'idle' | 'testing' | 'ok' | 'fail';
 
-export function SettingsModal({ onClose, onResetLayout }: Props) {
+export function SettingsModal({ onClose, onResetLayout, onExportLayout, onImportLayout }: Props) {
   const initial = getSettings();
   const [haUrl, setHaUrl] = useState(initial.haUrl);
   const [haToken, setHaToken] = useState(initial.haToken);
@@ -79,6 +82,34 @@ export function SettingsModal({ onClose, onResetLayout }: Props) {
       new CustomEvent('ha:ambient-effects', { detail: getSettings().ambientEffects }),
     );
     onClose();
+  };
+
+  // Download the current layout (all views + tiles + glance config) as a file
+  // the user can re-import after deploying the add-on/Docker container.
+  const exportLayout = () => {
+    const json = onExportLayout();
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `ha-dashboard-layout-${stamp}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importLayout = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        onImportLayout(String(reader.result));
+        alert('Layout imported. Reloading…');
+        window.location.reload();
+      } catch (err) {
+        alert(`Import failed: ${err instanceof Error ? err.message : 'invalid file'}`);
+      }
+    };
+    reader.readAsText(file);
   };
 
   return (
@@ -217,6 +248,29 @@ export function SettingsModal({ onClose, onResetLayout }: Props) {
             <h4 className="settings-section-title">
               <span className="mdi mdi-database" /> Dashboard data
             </h4>
+            <small className="settings-hint">
+              Export saves your full layout (views, tiles, and at-a-glance buttons) to a
+              file. Import it after deploying to a new device, Docker container, or add-on
+              so you don't have to rebuild it.
+            </small>
+            <div className="settings-data-row">
+              <button className="toolbar-btn" onClick={exportLayout}>
+                <span className="mdi mdi-download" /> Export layout
+              </button>
+              <label className="toolbar-btn" style={{ cursor: 'pointer' }}>
+                <span className="mdi mdi-upload" /> Import layout
+                <input
+                  type="file"
+                  accept="application/json,.json"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) importLayout(file);
+                    e.target.value = '';
+                  }}
+                />
+              </label>
+            </div>
             <button
               className="toolbar-btn danger"
               onClick={() => {

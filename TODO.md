@@ -40,29 +40,24 @@ Decision: leaving as `localStorage` for now since it works on a single device.
 
 ## Deployment
 
-- [ ] **Ship as a Home Assistant Add-on (Option B)** — run the dashboard as a
-  Supervisor-managed add-on directly on the HA server, surfaced in the sidebar
-  via Ingress (so it inherits HA auth, no extra exposed port).
-  - **Token: user-entered, never baked.** The long-lived token is NOT baked into
-    the build or stored in add-on options. The user adds it via the in-app
-    **Settings** UI (stays in that browser's `localStorage`, never hits disk).
-    This keeps the bundle/token out of the image and out of HA config.
-  - Serving: `vite preview --host 0.0.0.0` already runs the `/layout` API
-    (`vite-layout-plugin.ts` registers `configurePreviewServer`), so the same
-    process serves the static build AND persists layouts — no separate backend.
-    (Optionally graduate to a ~30-line static server later for "production
-    correctness," but not required.)
-  - Persistence: mount `/data` (add-on persistent volume) for `layouts.json` so
-    layouts/glance config survive restarts and updates.
-  - Add-on scaffolding to create: `Dockerfile` (HA base image, e.g.
-    `ghcr.io/hassio-addons/base`), `config.yaml` (add-on manifest with
-    `ingress: true`, ports, `map: [...]`/`/data`), `run.sh` (s6/bashio startup),
-    `repository.yaml`, icon/logo, and add-on docs.
-  - Ingress base-path: set Vite `base` (or runtime base) so assets resolve under
-    `/api/hassio_ingress/<token>/…`; `vite.config.ts` `preview.allowedHosts`
-    likely needs the ingress host allowed.
-  - The dev `server.proxy` (`/api`, `/local`) is dev-only; in the add-on the
-    browser talks to HA directly over websocket, so no proxy needed.
+- [x] ~~**Ship as a Home Assistant Add-on (Option B)**~~ — runs as a
+  Supervisor-managed add-on via Ingress. Scaffolding lives in [`addon/`](addon/):
+  `config.yaml` (ingress, `ingress_port: 3000`, sidebar panel), `build.yaml`
+  (per-arch `ghcr.io/hassio-addons/base`), `Dockerfile` (multi-stage: clones +
+  `npm run build`, runtime runs `vite preview`), `run.sh` (bashio startup, seeds
+  the generic starter template into `/data/layouts.json` on first run, exports
+  `LAYOUT_FILE`/`PORT`), plus `README.md`/`CHANGELOG.md`. Root `repository.yaml`
+  registers the add-on repo.
+  - **Token: user-entered, never baked** — added via the in-app **Settings** UI
+    (`localStorage`), never written to disk or into the image.
+  - Vite `base: './'` + `BASE_URL`-relative `/layout` fetch + `preview.host`/
+    `allowedHosts: true` so assets and the persistence API work behind Ingress.
+  - `vite-layout-plugin.ts` honors `LAYOUT_FILE` so layouts persist on `/data`.
+  - **Layout export/import** — Settings → Dashboard data has **Export layout**
+    (downloads all views/tiles/glance config as JSON) and **Import layout** so
+    an existing dashboard can be moved onto a fresh deploy without rebuilding.
+    `useLayout` exposes `exportLayout()` / `importLayout()`. (Personal layout
+    backup captured locally for redeploy.)
 
 ## High-end polish ideas
 

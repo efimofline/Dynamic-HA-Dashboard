@@ -2,7 +2,11 @@ import type { Plugin, ViteDevServer } from 'vite';
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-const LAYOUT_FILE = resolve(process.cwd(), 'layouts.json');
+// Where the shared layout JSON lives. Override with LAYOUT_FILE so the HA
+// add-on can point it at the persistent /data volume.
+const LAYOUT_FILE = process.env.LAYOUT_FILE
+  ? resolve(process.env.LAYOUT_FILE)
+  : resolve(process.cwd(), 'layouts.json');
 const ROUTE = '/layout';
 const MAX_BYTES = 512 * 1024;
 
