@@ -117,9 +117,9 @@ own Home Assistant, then click **Add**.
    ```
    https://github.com/jvenuto80/Dynamic-HA-Dashboard
    ```
-4. Refresh the store (pull-to-refresh / reload). A new **Dynamic HA Dashboard
+4. Refresh the store (pull-to-refresh / reload). A new **Glance — HA Dashboard
    Add-ons** section appears.
-5. Open **Dynamic HA Dashboard** → **Install** → **Start** → **Open Web UI**
+5. Open **Glance — HA Dashboard** → **Install** → **Start** → **Open Web UI**
    (it also appears as **Glance** in the sidebar).
 
 > First install builds from source on your device (clones the repo + `npm run
@@ -143,12 +143,13 @@ src/
 
   hooks/
     useHomeAssistant.ts  WebSocket connection, entity state, callHA, history/forecast
-    useLayout.ts         Loads/saves the dashboard layout (views, rows, tiles)
+    useLayout.ts         Loads/saves the layout (views, tiles, glance); export/import
     useArtworkColor.ts   Extracts a dominant color from now-playing artwork
 
   lib/
     layout.ts          viewRows() and layout helpers
     tileSize.ts        Tile span/size logic
+    glance.ts          At-a-glance metric catalog + computeMetric()
     colorExtract.ts    Canvas-based dominant-color extraction
     viewTransition.ts  View Transitions API wrapper (shared-element morphs)
     haptics.ts         navigator.vibrate + delegated press listener
@@ -157,8 +158,8 @@ src/
   components/          One component per surface (see Features below)
   styles/theme.css     All styling + animations (single stylesheet)
 
-vite-layout-plugin.ts  Dev/preview middleware: GET/POST/DELETE /layout → layouts.json
-layouts.json           Persisted custom layout (shared across devices)
+vite-layout-plugin.ts  Dev/preview middleware: GET/POST/DELETE /layout (honors LAYOUT_FILE)
+layouts.json           Persisted custom layout (on the add-on: /data/layouts.json)
 ```
 
 ### Data flow
@@ -167,7 +168,9 @@ layouts.json           Persisted custom layout (shared across devices)
   exposes `entities`, `connected`, `error`, `callHA(domain, service, …)`,
   `getForecast`, and `getHistory`.
 - `useLayout` loads the editable layout from `/layout` (falls back to a default),
-  and writes changes back via the Vite middleware to `layouts.json`.
+  and writes changes back via the Vite middleware to `layouts.json` (or
+  `/data/layouts.json` on the add-on). It also exposes `exportLayout()` /
+  `importLayout()` for moving a layout between devices/deploys.
 - `App` resolves the active view, renders its scenes + tiles, and owns the
   `DetailPanel` flyout (entity controls, camera, history, links, quick actions).
 
@@ -179,15 +182,18 @@ layouts.json           Persisted custom layout (shared across devices)
 - **Multiple views/pages** with a left **Sidebar** + **RoomNav**.
 - **Edit mode** — drag-and-drop tiles (`@dnd-kit`), add/remove tiles, add/reorder/
   remove scenes per view, reset to defaults. Saved to `layouts.json` (syncs across
-  devices on the same host).
+  devices on the same host; persists to `/data` on the add-on).
 - **Per-tile settings** (`TileSettings`) — camera entity, links, quick actions,
   flyout config, reverse slider, custom artwork entity, tile size/span.
+- **Layout export / import** (Settings → Dashboard data) — download the full
+  layout as JSON and re-import it on a new device or deploy.
 
 ### Tiles & cards
 - `DeviceTile` — lights, switches, media players, covers, locks, buttons, etc.
   with slide-to-dim, live artwork backgrounds, and per-domain controls.
 - `ClimateCards`, `LockCards`, `VacuumCard`, `CameraGrid`, `SensorWidgets`,
-  `RoomCard` / `RoomPanel`, `PersonTracker`, `Sparkline`.
+  `RoomCard` / `RoomPanel`, `PersonTracker`, `Sparkline`, `ScenePills`.
+- `DashboardView` renders a view's scenes + tile grid; `RoomNav` switches rooms.
 - `DetailPanel` flyout — full controls, camera feed, history graph, scenes, links.
 
 ### Theming
@@ -207,8 +213,13 @@ layouts.json           Persisted custom layout (shared across devices)
   so the spring doesn't double-fire (`vt-active` flag managed by App's `onClose`).
 - **Animated media progress bar / equalizer** — interpolated playback position +
   a bouncing EQ badge on playing media tiles.
-- **At-a-glance header strip** (`GlanceStrip`) — active light count, indoor temp,
-  who's home, media playing; omits stats with no data.
+- **At-a-glance header strip** (`GlanceStrip`) — a row of summary buttons
+  (lights on, who's home, climate, media, etc.). **Fully configurable in edit
+  mode**: pick each button's metric, set a custom label, toggle its flyout, and
+  build a per-button exclude list (tablet/kiosk screen lights are filtered by
+  default). Config persists on the view (`view.glance`) so it syncs across
+  devices. The header **greeting is dynamic** — it names whoever is actually
+  home from the `person.*` states.
 - **Haptics + spring press** — `lib/haptics.ts` installs one delegated
   `pointerdown` listener firing `navigator.vibrate(8)` on touch/pen taps over
   interactive surfaces (no-op on desktop/mouse). Tiles/pills snap to `scale(0.95–
@@ -250,7 +261,8 @@ weather/clock. Particles are suppressed under reduced-motion.
 
 App settings (HA URL, token, theme, accent) currently save to **`localStorage`**
 (per browser/device). The dashboard **layout** saves server-side to
-`layouts.json` via the Vite middleware (shared across devices). See
+`layouts.json` via the Vite middleware — shared across devices on the same host,
+and persisted to `/data/layouts.json` when running as the add-on. See
 [TODO.md](./TODO.md) for the cross-device settings options under consideration.
 
 ---

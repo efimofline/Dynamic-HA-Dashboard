@@ -10,7 +10,7 @@ inherits HA's authentication).
 
 [![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fjvenuto80%2FDynamic-HA-Dashboard)
 
-Then find **Dynamic HA Dashboard** in the store, **Install**, **Start**, and
+Then find **Glance — HA Dashboard** in the store, **Install**, **Start**, and
 **Open Web UI** (or use the **Glance** sidebar panel).
 
 > **Note:** the button only *adds the repository* (you still click **Add** in
@@ -24,7 +24,7 @@ Then find **Dynamic HA Dashboard** in the store, **Install**, **Start**, and
    ```
    https://github.com/jvenuto80/Dynamic-HA-Dashboard
    ```
-3. Find **Dynamic HA Dashboard** in the store and click **Install**.
+3. Find **Glance — HA Dashboard** in the store and click **Install**.
 4. Click **Start**, then **Open Web UI** (or use the **Glance** sidebar panel).
 
 ## First-time setup
