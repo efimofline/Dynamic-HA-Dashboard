@@ -11,6 +11,10 @@ motion and ambient effects.
 
 > Companion file: [TODO.md](./TODO.md) tracks remaining ideas and decisions.
 
+> 📖 **For full documentation** — installation, configuration, features, layout
+> backup/restore, architecture, add-on development, and troubleshooting — see the
+> **[Glance Wiki](https://github.com/jvenuto80/Dynamic-HA-Dashboard/wiki)**.
+
 <a href="https://venmo.com/u/jvenuto" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Buy%20me%20a%20beer-%F0%9F%8D%BA-FF8C42?style=for-the-badge" alt="Buy me a beer" /></a>
 
 ---
