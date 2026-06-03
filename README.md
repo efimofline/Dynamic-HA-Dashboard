@@ -239,6 +239,16 @@ App settings (HA URL, token, theme, accent) currently save to **`localStorage`**
 
 ---
 
+## License
+
+Copyright (c) 2026 Jeff Venuto. All rights reserved. See [LICENSE](./LICENSE).
+
+You may use, modify, and share this project **for free, with attribution** to
+the Owner and a link back to this repository. You may **not sell it** or use it
+for commercial gain, and derivatives must keep these same terms.
+
+---
+
 ## Support
 
 If this dashboard made your home feel a little more premium, you can say thanks:
