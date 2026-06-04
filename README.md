@@ -184,6 +184,12 @@ layouts.json           Persisted custom layout (on the add-on: /data/layouts.jso
 
 ### Layout & editing
 - **Multiple views/pages** with a left **Sidebar** + **RoomNav**.
+- **Compact sections** (Settings → Appearance, on by default) — flows whole
+  sections into a responsive masonry so short sections sit side-by-side and fill
+  the screen width, instead of each claiming a full-width band with a tall empty
+  gap underneath. Section headings and separation stay intact; sections never
+  split across columns; column count scales with the viewport. Far less vertical
+  scrolling on smaller tablets. Turn it off to stack every section full-width.
 - **Edit mode** — drag-and-drop tiles (`@dnd-kit`), add/remove tiles, add/reorder/
   remove scenes per view, reset to defaults. Saved to `layouts.json` (syncs across
   devices on the same host; persists to `/data` on the add-on).

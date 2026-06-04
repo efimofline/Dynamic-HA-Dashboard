@@ -5,7 +5,7 @@ import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { ScenePills } from './components/ScenePills';
 import { GlanceStrip } from './components/GlanceStrip';
-import { AmbientBackdrop } from './components/AmbientBackdrop';import { PersonTracker } from './components/PersonTracker';
+import { AmbientBackdrop } from './components/AmbientBackdrop';
 import { DashboardView } from './components/DashboardView';
 import { DetailPanel } from './components/DetailPanel';
 import { EntityPicker } from './components/DashboardView';
@@ -91,18 +91,6 @@ export default function App() {
             onOpenDetail={setDetailEntity}
             callHA={callHA}
           />
-        )}
-
-        {!editing && (viewScenes.length > 0 || activeView === 'main') && (
-          <div className="home-top">
-            {viewScenes.length > 0 && (
-              <div className="glass-card scenes-card">
-                <h3 className="block-title">Scenes</h3>
-                <ScenePills entities={entities} onToggle={toggleEntity} scenes={viewScenes} />
-              </div>
-            )}
-            {activeView === 'main' && <PersonTracker entities={entities} />}
-          </div>
         )}
 
         {editing && view.kind !== 'cameras' && (
@@ -198,6 +186,13 @@ export default function App() {
           editing={editing}
           layout={layout}
         />
+
+        {!editing && viewScenes.length > 0 && (
+          <div className="glass-card scenes-card scenes-bottom">
+            <h3 className="block-title">Scenes</h3>
+            <ScenePills entities={entities} onToggle={toggleEntity} scenes={viewScenes} />
+          </div>
+        )}
       </main>
 
       <DetailPanel

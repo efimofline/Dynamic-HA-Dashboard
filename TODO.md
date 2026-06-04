@@ -115,6 +115,10 @@ Decision: leaving as `localStorage` for now since it works on a single device.
 
 ### Information density, done elegantly
 
+- [x] ~~Compact sections — flow whole sections into a responsive masonry so short
+  sections sit side-by-side and fill the screen width (keeping section headings)
+  instead of leaving tall vertical gaps. On by default; toggle in
+  Settings → Appearance.~~
 - [ ] Sparklines on more tiles (climate/sensor) using the existing `Sparkline`.
 - [ ] Quiet status dots that pulse only on change.
 - [ ] Smart grouping — collapse an idle room into one tile, expand on tap.

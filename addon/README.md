@@ -52,6 +52,10 @@ disk or baked into the image.
 ## Your layout
 
 - A generic starter layout is seeded on first run so you have something to edit.
+- **Compact sections** (Settings → Appearance, on by default) flows short
+  sections side-by-side so they fill the screen width instead of leaving tall
+  vertical gaps — less scrolling on smaller tablets. Section headings stay. Turn
+  it off to stack every section full-width.
 - Your customizations (views, tiles, and at-a-glance buttons) are saved to the
   add-on's persistent `/data/layouts.json` and survive restarts and updates.
 

@@ -1,6 +1,7 @@
 import type { HassEntities } from 'home-assistant-js-websocket';
 import { useEffect, useState } from 'react';
 import { AnimatedNumber } from './AnimatedNumber';
+import { PersonTracker } from './PersonTracker';
 import { persons } from '../config';
 
 interface ForecastDay {
@@ -102,8 +103,9 @@ export function Header({ entities, getForecast }: Props) {
           {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
         </p>
       </div>
-      {weather && (
-        <div className="weather-widget">
+      <div className="header-right">
+        {weather && (
+          <div className="weather-widget">
           <div className="weather-now">
             <span className={`mdi ${getWeatherIcon(state)}`} style={{ fontSize: 36, color: '#f59e0b' }} />
             <div>
@@ -135,8 +137,10 @@ export function Header({ entities, getForecast }: Props) {
               ))}
             </div>
           )}
-        </div>
-      )}
+          </div>
+        )}
+        <PersonTracker entities={entities} variant="compact" />
+      </div>
     </header>
   );
 }

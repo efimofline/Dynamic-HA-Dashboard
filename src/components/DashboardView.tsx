@@ -24,7 +24,22 @@ import { CameraGrid } from './CameraGrid';
 import { effectiveSize, sizeToSpan } from '../lib/tileSize';
 import { viewRows } from '../lib/layout';
 import { HA_URL } from '../config';
+import { getSettings } from '../settings';
 import { TileSettings } from './TileSettings';
+
+/** Subscribe to the "compact sections" preference (live-updated from Settings).
+ *  When on, sections flow into a responsive masonry so short sections sit
+ *  side-by-side and fill horizontal space instead of stacking full-width with
+ *  big vertical gaps. Section headings/separation are preserved. */
+function useCompactSections(): boolean {
+  const [compact, setCompact] = useState(() => getSettings().compactSections);
+  useEffect(() => {
+    const onChange = (e: Event) => setCompact((e as CustomEvent<boolean>).detail);
+    window.addEventListener('ha:compact-sections', onChange);
+    return () => window.removeEventListener('ha:compact-sections', onChange);
+  }, []);
+  return compact;
+}
 
 type CallHA = (domain: string, service: string, data?: Record<string, unknown>, target?: { entity_id: string | string[] }) => Promise<void>;
 
@@ -69,6 +84,7 @@ interface Props {
 
 export function DashboardView(props: Props) {
   const { view, entities, editing } = props;
+  const compactSections = useCompactSections();
 
   if (view.kind === 'cameras') {
     return (
@@ -92,8 +108,15 @@ export function DashboardView(props: Props) {
   // Running index across all tiles so each gets a slightly later entrance,
   // producing a gentle cascade when the view mounts/switches.
   let tileIndex = 0;
+
+  // Compact sections: let short sections nestle side-by-side in a masonry so
+  // they fill horizontal space instead of stacking full-width with big vertical
+  // gaps (less scrolling on tablets). Headings + separation stay intact. Sensor
+  // views keep the classic full-width stack (their graphs read better wide).
+  const compact = compactSections && view.kind !== 'sensors';
+
   return (
-    <div className="view-rows" key={view.id}>
+    <div className={`view-rows ${compact ? 'compact' : ''}`} key={view.id}>
       {rows.map((row, ri) => (
         <section className="view-row" key={ri}>
           {row.title && <h2 className="row-title">{row.title}</h2>}

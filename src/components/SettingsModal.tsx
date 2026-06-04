@@ -33,6 +33,7 @@ export function SettingsModal({ onClose, onResetLayout, onExportLayout, onImport
   const [theme, setTheme] = useState<ThemeId>(initial.theme);
   const [accent, setAccent] = useState(initial.accent);
   const [ambientEffects, setAmbientEffects] = useState(initial.ambientEffects);
+  const [compactSections, setCompactSections] = useState(initial.compactSections);
   const [test, setTest] = useState<TestState>('idle');
   const [testMsg, setTestMsg] = useState('');
 
@@ -50,6 +51,13 @@ export function SettingsModal({ onClose, onResetLayout, onExportLayout, onImport
     setAmbientEffects(next);
     // Live-preview the backdrop without persisting yet.
     window.dispatchEvent(new CustomEvent('ha:ambient-effects', { detail: next }));
+  };
+
+  const toggleFlow = () => {
+    const next = !compactSections;
+    setCompactSections(next);
+    // Live-preview the layout reflow without persisting yet.
+    window.dispatchEvent(new CustomEvent('ha:compact-sections', { detail: next }));
   };
 
   const effectiveUrl = haUrl.trim() || 'http://homeassistant.local:8123';
@@ -72,7 +80,7 @@ export function SettingsModal({ onClose, onResetLayout, onExportLayout, onImport
   const save = (reload: boolean) => {
     const url = haUrl.trim();
     const token = haToken.trim();
-    saveSettings({ haUrl: url, haToken: token, theme, accent, ambientEffects, rememberOnServer });
+    saveSettings({ haUrl: url, haToken: token, theme, accent, ambientEffects, compactSections, rememberOnServer });
     // Sync the opt-in shared connection on the server. Store the *effective* URL
     // (falls back to the default host) so other devices never adopt an empty URL.
     if (rememberOnServer && token) {
@@ -92,6 +100,9 @@ export function SettingsModal({ onClose, onResetLayout, onExportLayout, onImport
     applyTheme(getSettings());
     window.dispatchEvent(
       new CustomEvent('ha:ambient-effects', { detail: getSettings().ambientEffects }),
+    );
+    window.dispatchEvent(
+      new CustomEvent('ha:compact-sections', { detail: getSettings().compactSections }),
     );
     onClose();
   };
@@ -268,6 +279,20 @@ export function SettingsModal({ onClose, onResetLayout, onExportLayout, onImport
                 role="switch"
                 aria-checked={ambientEffects}
                 onClick={toggleEffects}
+              >
+                <span className="ts-switch-knob" />
+              </button>
+            </label>
+            <label className="ts-toggle-field">
+              <div className="ts-toggle-text">
+                <span>Compact sections</span>
+                <small>Let short sections sit side-by-side so they fill the screen width instead of stacking with big vertical gaps — less scrolling on smaller tablets. Section headings stay. Off stacks every section full-width.</small>
+              </div>
+              <button
+                className={`ts-switch ${compactSections ? 'on' : ''}`}
+                role="switch"
+                aria-checked={compactSections}
+                onClick={toggleFlow}
               >
                 <span className="ts-switch-knob" />
               </button>

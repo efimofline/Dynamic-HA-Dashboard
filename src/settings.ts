@@ -9,6 +9,7 @@ export interface AppSettings {
   theme: ThemeId;
   accent: string; // hex color used as the primary accent
   ambientEffects: boolean; // weather backdrop (rain/snow particles, lightning)
+  compactSections: boolean; // flow sections into a masonry so short ones sit side-by-side (less wasted vertical space)
   rememberOnServer: boolean; // opt-in: store connection (URL + token) on the server so new devices auto-connect
 }
 
@@ -43,6 +44,7 @@ const DEFAULTS: AppSettings = {
   theme: 'midnight',
   accent: DEFAULT_ACCENT,
   ambientEffects: true,
+  compactSections: true,
   rememberOnServer: false,
 };
 

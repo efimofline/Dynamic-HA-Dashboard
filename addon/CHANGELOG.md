@@ -1,4 +1,21 @@
 # Changelog
+## 0.9.4.0-beta
+
+- **Header people bubble.** Moved the People avatars into the header's top-right,
+  level with the weather, in their own glass bubble matching the weather widget.
+- **Scenes moved to the bottom.** The Scenes card now lives at the bottom of the
+  page instead of the top, so the room tiles shift up and are visible sooner
+  without scrolling.
+## 0.9.3.9-beta
+
+- **Compact sections (smarter space).** New **Settings → Appearance → Compact
+  sections** toggle (on by default) flows whole sections into a responsive
+  masonry so short sections sit side-by-side and fill the screen width, instead
+  of each claiming a full-width band with a tall empty gap underneath (e.g.
+  Kitchen above Climate & Utilities). Section headings and separation stay
+  intact, and sections never split across columns. Column count scales with the
+  viewport (1 → 4). Turn it off to stack every section full-width. Sensor views
+  keep the full-width stack so their graphs read wide.
 ## 0.9.3.8-beta
 
 - **Resolution-aware tiles.** Tile width, height and gap now scale with the
