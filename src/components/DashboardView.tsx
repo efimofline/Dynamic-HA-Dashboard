@@ -21,8 +21,10 @@ import { CSS } from '@dnd-kit/utilities';
 import type { DashView, DashRow, RoomEntity } from '../types';
 import { DeviceTile } from './DeviceTile';
 import { CameraGrid } from './CameraGrid';
+import { MusicAssistantSearch, type SearchMusic, type PlayMusic } from './MusicAssistantSearch';
 import { effectiveSize, sizeToSpan } from '../lib/tileSize';
 import { viewRows } from '../lib/layout';
+import { isSpecialTile, SPECIAL_TILES } from '../lib/musicAssistant';
 import { HA_URL } from '../config';
 import { getSettings } from '../settings';
 import { TileSettings } from './TileSettings';
@@ -82,6 +84,10 @@ interface Props {
   layout: LayoutActions;
   /** Switch the dashboard into edit mode (used by the empty-page call to action). */
   onRequestEdit?: () => void;
+  /** Music Assistant search (for the special MA search tile). */
+  searchMusic?: SearchMusic;
+  /** Music Assistant playback (for the special MA search tile). */
+  playMusic?: PlayMusic;
 }
 
 export function DashboardView(props: Props) {
@@ -112,9 +118,9 @@ export function DashboardView(props: Props) {
   let tileIndex = 0;
 
   // A page with no tiles (e.g. a freshly created one) gets a friendly call to
-  // action instead of an empty void.
+  // action instead of an empty void. Special (non-entity) tiles count too.
   const hasTiles = rows.some((r) =>
-    r.columns.some((c) => c.entities.some((e) => entities[e.entity_id])),
+    r.columns.some((c) => c.entities.some((e) => entities[e.entity_id] || isSpecialTile(e.entity_id))),
   );
   if (!hasTiles) {
     return (
@@ -150,7 +156,7 @@ export function DashboardView(props: Props) {
                 {col.title && <h3 className="column-title">{col.title}</h3>}
                 <div className="tile-grid">
                   {col.entities
-                    .filter((e) => entities[e.entity_id])
+                    .filter((e) => entities[e.entity_id] || isSpecialTile(e.entity_id))
                     .map((re) => (
                       <Tile key={re.entity_id} re={re} enterIndex={tileIndex++} {...props} />
                     ))}
@@ -174,7 +180,26 @@ function Tile({
   getHistory,
   view,
   enterIndex,
+  searchMusic,
+  playMusic,
 }: { re: RoomEntity; enterIndex?: number } & Props) {
+  // Special (non-entity) tiles render their own card.
+  if (isSpecialTile(re.entity_id)) {
+    const def = SPECIAL_TILES[re.entity_id];
+    if (re.entity_id === 'music_assistant.search' && searchMusic && playMusic) {
+      return (
+        <MusicAssistantSearch
+          entities={entities}
+          searchMusic={searchMusic}
+          playMusic={playMusic}
+          name={re.name || def.name}
+          icon={re.icon || def.icon}
+        />
+      );
+    }
+    return null;
+  }
+
   const entity = entities[re.entity_id];
   if (!entity) return null;
   const name = re.name || (entity.attributes.friendly_name as string);
@@ -553,11 +578,15 @@ function SortableTile({
     zIndex: isDragging ? 5 : undefined,
   };
 
-  const name = entity
-    ? item.re.name || (entity.attributes.friendly_name as string)
-    : item.re.entity_id;
+  const special = isSpecialTile(item.re.entity_id);
+  const specialDef = special ? SPECIAL_TILES[item.re.entity_id] : null;
+  const name = special
+    ? item.re.name || specialDef!.name
+    : entity
+      ? item.re.name || (entity.attributes.friendly_name as string)
+      : item.re.entity_id;
   const domain = item.re.entity_id.split('.')[0];
-  const missing = !entity;
+  const missing = !entity && !special;
 
   return (
     <div
@@ -567,7 +596,18 @@ function SortableTile({
       {...attributes}
       {...listeners}
     >
-      {missing ? (
+      {special ? (
+        <div className="tile ma-tile ma-tile-edit">
+          <div className="tile-top">
+            <span className={`mdi ${item.re.icon || specialDef!.icon} tile-icon ma-tile-icon`} />
+          </div>
+          <div className="tile-info">
+            <div className="tile-name">{name}</div>
+            <div className="tile-sub">Search &amp; play</div>
+          </div>
+          <span className="mdi mdi-magnify ma-tile-search" aria-hidden="true" />
+        </div>
+      ) : missing ? (
         <div className="tile edit-missing-tile">
           <span className="mdi mdi-help-circle-outline tile-icon" />
           <div className="tile-info">
@@ -660,6 +700,21 @@ export function EntityPicker({
   }, [onClose]);
 
   const allowed = domainFilter ?? PICKER_DOMAINS;
+
+  // Special (non-entity) cards — only offered in the general add-tile picker
+  // (no domain filter), not in scene/exclude pickers.
+  const specials = useMemo(() => {
+    if (domainFilter) return [];
+    const q = query.trim().toLowerCase();
+    return Object.entries(SPECIAL_TILES)
+      .filter(([id, def]) => {
+        if (existing.has(id)) return false;
+        if (!q) return true;
+        return def.name.toLowerCase().includes(q) || id.toLowerCase().includes(q);
+      })
+      .map(([id, def]) => ({ id, ...def }));
+  }, [domainFilter, query, existing]);
+
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     return Object.values(entities)
@@ -696,7 +751,17 @@ export function EntityPicker({
           </button>
         </div>
         <div className="picker-list">
-          {results.length === 0 && <div className="picker-empty">No matching entities.</div>}
+          {specials.map((s) => (
+            <button key={s.id} className="picker-item picker-special" onClick={() => onPick(s.id)}>
+              <span className="picker-item-name">
+                <span className={`mdi ${s.icon} picker-special-icon`} /> {s.name}
+              </span>
+              <span className="picker-special-badge">Card</span>
+            </button>
+          ))}
+          {results.length === 0 && specials.length === 0 && (
+            <div className="picker-empty">No matching entities.</div>
+          )}
           {results.map((e) => {
             const name = String(e.attributes.friendly_name ?? e.entity_id);
             return (

@@ -118,5 +118,65 @@ export function useHomeAssistant() {
     [],
   );
 
-  return { entities, connected, error, callHA, getState, getForecast, getHistory };
+  // ── Music Assistant ──
+  // The `music_assistant.search` service needs the integration's config entry id.
+  // Resolve it lazily and cache it (undefined = not yet looked up, null = none).
+  const maEntryId = useRef<string | null | undefined>(undefined);
+
+  const getMaEntryId = useCallback(async (): Promise<string | null> => {
+    if (maEntryId.current !== undefined) return maEntryId.current;
+    if (!connRef.current) return null;
+    try {
+      const entries = (await connRef.current.sendMessagePromise({
+        type: 'config_entries/get',
+      })) as Array<{ entry_id: string; domain: string }>;
+      maEntryId.current = entries.find((e) => e.domain === 'music_assistant')?.entry_id ?? null;
+    } catch {
+      maEntryId.current = null;
+    }
+    return maEntryId.current;
+  }, []);
+
+  /** Search Music Assistant; returns the raw grouped response (artists/albums/…). */
+  const searchMusic = useCallback(
+    async (opts: {
+      term: string;
+      mediaType?: string;
+      limit?: number;
+      libraryOnly?: boolean;
+    }): Promise<Record<string, unknown>> => {
+      if (!connRef.current) throw new Error('Not connected to Home Assistant.');
+      const entryId = await getMaEntryId();
+      if (!entryId) throw new Error('Music Assistant integration not found.');
+      const data: Record<string, unknown> = {
+        config_entry_id: entryId,
+        name: opts.term,
+        limit: opts.limit && opts.limit > 0 ? opts.limit : 5,
+        library_only: !!opts.libraryOnly,
+      };
+      if (opts.mediaType) data.media_type = [opts.mediaType];
+      const res = (await callService(
+        connRef.current,
+        'music_assistant',
+        'search',
+        data,
+        undefined,
+        true,
+      )) as { response?: Record<string, unknown> };
+      return res?.response ?? {};
+    },
+    [getMaEntryId],
+  );
+
+  /** Play a Music Assistant media uri on a media_player. */
+  const playMusic = useCallback(
+    async (playerEntityId: string, mediaId: string, mediaType?: string) => {
+      const data: Record<string, unknown> = { media_id: mediaId };
+      if (mediaType) data.media_type = mediaType;
+      await callHA('music_assistant', 'play_media', data, { entity_id: playerEntityId });
+    },
+    [callHA],
+  );
+
+  return { entities, connected, error, callHA, getState, getForecast, getHistory, searchMusic, playMusic };
 }
