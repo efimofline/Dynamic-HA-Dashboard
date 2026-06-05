@@ -1,4 +1,16 @@
 # Changelog
+## 1.0.1
+
+- **Fixed layout export dropping edits.** Exporting your layout silently lost
+  data: the export stripped the canonical row/column layout (`rows`) and wrote
+  out only the legacy `sections` field, which edits never updated. As a result
+  tiles you added were missing, tiles you removed came back, in-app–created
+  pages exported empty, and the whole thing round-tripped to a stale state on
+  import. Export now keeps the real layout and rebuilds `sections` from it, so
+  export → import is lossless (tiles, removed tiles, pages, at-a-glance buttons,
+  and their exclusions all carry over). Saved layouts are also kept internally
+  consistent on every save.
+
 ## 1.0.0
 
 - **First stable release.** Graduating out of beta.

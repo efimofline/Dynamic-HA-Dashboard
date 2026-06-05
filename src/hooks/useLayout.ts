@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { views as defaultViews } from '../config';
-import { withRows } from '../lib/layout';
+import { syncSections, withRows } from '../lib/layout';
 import type { DashRow, DashView, GlanceButtonConfig, RoomEntity, TileSize } from '../types';
 
 // Resolve the layout API relative to the app's base path so it works behind
@@ -46,12 +46,15 @@ export function useLayout() {
   const persist = useCallback((next: DashView[]) => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     setSaving(true);
+    // Rebuild the legacy `sections` from the canonical `rows` before saving so
+    // the on-disk file never carries stale sections (edits only touch `rows`).
+    const payload = syncSections(next);
     saveTimer.current = setTimeout(async () => {
       try {
         await fetch(ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(next),
+          body: JSON.stringify(payload),
         });
       } catch {
         /* ignore */
@@ -420,11 +423,13 @@ export function useLayout() {
     persist(withRows(clone(blank)));
   }, [persist]);
 
-  /** Serialize the current layout to a pretty JSON string (for export/download). */
+  /** Serialize the current layout to a pretty JSON string (for export/download).
+   *  Keeps the canonical `rows` (the real, edited tile layout) and rebuilds the
+   *  legacy `sections` from it so the file is internally consistent — earlier
+   *  this stripped `rows` and shipped the stale `sections`, silently dropping
+   *  added tiles, resurrecting removed ones, and exporting in-app pages empty. */
   const exportLayout = useCallback(() => {
-    // Strip the derived `rows` so the export matches the on-disk schema.
-    const clean = views.map(({ rows: _rows, ...v }) => v);
-    return JSON.stringify(clean, null, 2);
+    return JSON.stringify(syncSections(views), null, 2);
   }, [views]);
 
   /** Replace the entire layout from imported JSON (string or parsed array). */
