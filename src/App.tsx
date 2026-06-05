@@ -1,6 +1,7 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { useHomeAssistant } from './hooks/useHomeAssistant';
 import { useLayout } from './hooks/useLayout';
+import { useSwipeNav } from './hooks/useSwipeNav';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { ScenePills } from './components/ScenePills';
@@ -11,8 +12,10 @@ import { DetailPanel } from './components/DetailPanel';
 import { EntityPicker } from './components/DashboardView';
 import { SettingsModal } from './components/SettingsModal';
 import { PagesManager } from './components/PagesManager';
+import { PageDots } from './components/PageDots';
 import { Onboarding } from './components/Onboarding';
 import { viewRows } from './lib/layout';
+import { runNavTransition } from './lib/viewTransition';
 import { scenes, HA_TOKEN } from './config';
 import type { RoomEntity } from './types';
 
@@ -52,6 +55,35 @@ export default function App() {
     },
     [layout, views],
   );
+
+  // ── Page navigation (sidebar tap, dot tap, and phone swipe) ──
+  const mainRef = useRef<HTMLElement>(null);
+
+  /** Jump to a page by id, sliding in the direction of travel relative to the
+   *  current page's position in the list. */
+  const goToView = useCallback(
+    (id: string) => {
+      if (id === activeView) return;
+      const from = views.findIndex((v) => v.id === activeView);
+      const to = views.findIndex((v) => v.id === id);
+      const dir = to >= from ? 'next' : 'prev';
+      runNavTransition(dir, () => setActiveView(id));
+    },
+    [activeView, views],
+  );
+
+  /** Advance to the adjacent page (used by swipe). Clamps at the ends. */
+  const goAdjacent = useCallback(
+    (dir: 'next' | 'prev') => {
+      const i = views.findIndex((v) => v.id === activeView);
+      const j = dir === 'next' ? i + 1 : i - 1;
+      if (j < 0 || j >= views.length) return;
+      runNavTransition(dir, () => setActiveView(views[j].id));
+    },
+    [activeView, views],
+  );
+
+  useSwipeNav(mainRef, { onSwipe: goAdjacent });
 
   // Map of entity_id -> configured tile (camera, links, quick actions) for the flyout.
   const configFor = useMemo(() => {
@@ -110,13 +142,13 @@ export default function App() {
         views={views}
         activeView={activeView}
         editing={editing}
-        onNavigate={setActiveView}
+        onNavigate={goToView}
         onOpenSettings={() => setShowSettings(true)}
         onAddPage={handleAddView}
         onManagePages={() => setShowPages(true)}
       />
 
-      <main className="main-content">
+      <main className="main-content" ref={mainRef}>
         <Header entities={entities} getForecast={getForecast} />
 
         {view.kind !== 'cameras' && view.kind !== 'sensors' && (
@@ -240,6 +272,8 @@ export default function App() {
         )}
       </main>
 
+      <PageDots views={views} activeView={activeView} onJump={goToView} />
+
       <DetailPanel
         entityId={detailEntity}
         entities={entities}
@@ -275,7 +309,7 @@ export default function App() {
         <PagesManager
           views={views}
           activeView={activeView}
-          onNavigate={setActiveView}
+          onNavigate={goToView}
           onAdd={handleAddView}
           onRename={layout.renameView}
           onIcon={layout.updateViewIcon}

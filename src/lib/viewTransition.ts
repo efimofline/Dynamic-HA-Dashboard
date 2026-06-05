@@ -38,3 +38,22 @@ export function runViewTransition(update: () => void, afterUpdate?: () => void):
   });
   return transition.finished;
 }
+
+/**
+ * Run a page-navigation state update as a directional slide. The whole root
+ * snapshot slides out one way while the incoming page slides in from the other,
+ * giving phone swipe-navigation a native, app-like feel. Falls back to an
+ * instant update when View Transitions aren't available or motion is reduced.
+ */
+export function runNavTransition(dir: 'next' | 'prev', update: () => void): Promise<void> {
+  if (!viewTransitionsAvailable() || !document.startViewTransition) {
+    update();
+    return Promise.resolve();
+  }
+  const root = document.documentElement;
+  const cls = dir === 'next' ? 'vt-nav-next' : 'vt-nav-prev';
+  root.classList.add(cls);
+  const transition = document.startViewTransition(() => flushSync(update));
+  transition.finished.finally(() => root.classList.remove(cls));
+  return transition.finished;
+}
