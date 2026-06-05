@@ -3972,11 +3972,101 @@ html.vt-active .detail-panel.open > * {
     flex-wrap: nowrap;
     padding-bottom: 8px;
   }
+  /* The sidebar is gone here — leave room for the floating page indicator so
+     the last tiles aren't hidden behind it (the dots themselves are revealed
+     in the .page-dots block below). */
+  .main-content {
+    padding-bottom: 72px;
+  }
 }
 
 /* ── Sidebar settings button (pinned to bottom) ── */
 .sidebar-settings {
   margin-top: auto;
+}
+
+/* ── Phone page indicator (swipe-nav dots) ──
+   Hidden by default; the ≤480px breakpoint (where the sidebar is removed)
+   flips it to flex. Floats above the content in the bottom safe area. */
+.page-dots {
+  display: none;
+  position: fixed;
+  left: 50%;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 60;
+  gap: 9px;
+  align-items: center;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: rgba(20, 22, 28, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+}
+
+.page-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+  cursor: pointer;
+  transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1), background 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.page-dot.active {
+  width: 22px;
+  background: var(--accent-primary, #ff6b35);
+}
+
+[data-theme='light'] .page-dots {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='light'] .page-dot {
+  background: rgba(0, 0, 0, 0.22);
+}
+
+/* Reveal the indicator only where the sidebar is hidden. Declared here (after
+   the base `display: none`) so source order can't override it. */
+@media (max-width: 480px) {
+  .page-dots {
+    display: flex;
+  }
+}
+
+/* ── Directional page-slide (phone swipe / dot navigation) ──
+   Slides the whole root snapshot: outgoing page exits one way, incoming page
+   enters from the other. `runNavTransition` sets the direction class. */
+@keyframes nav-out-left {
+  to { transform: translateX(-26%); opacity: 0; }
+}
+@keyframes nav-in-right {
+  from { transform: translateX(26%); opacity: 0; }
+}
+@keyframes nav-out-right {
+  to { transform: translateX(26%); opacity: 0; }
+}
+@keyframes nav-in-left {
+  from { transform: translateX(-26%); opacity: 0; }
+}
+
+html.vt-nav-next::view-transition-old(root) {
+  animation: nav-out-left 0.32s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+html.vt-nav-next::view-transition-new(root) {
+  animation: nav-in-right 0.32s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+html.vt-nav-prev::view-transition-old(root) {
+  animation: nav-out-right 0.32s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+html.vt-nav-prev::view-transition-new(root) {
+  animation: nav-in-left 0.32s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 /* ── Settings modal ── */

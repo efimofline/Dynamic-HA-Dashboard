@@ -39,6 +39,9 @@ motion and ambient effects.
 ### Responsive
 
 The same layout reflows from a full-size wall display down to a phone screen.
+On phones (portrait) the sidebar gives way to **swipe navigation** — swipe
+left/right to move between pages — with a slim page-indicator at the bottom that
+shows your position and lets you tap to jump straight to any page.
 
 <img src="screenshots/60-mobile.png" alt="Mobile layout" width="300" />
 
@@ -227,7 +230,9 @@ layouts.json           Persisted custom layout (on the add-on: /data/layouts.jso
 ## Features
 
 ### Layout & editing
-- **Multiple views/pages** with a left **Sidebar** + **RoomNav**.
+- **Multiple views/pages** with a left **Sidebar** + **RoomNav**. On phones the
+  sidebar gives way to **swipe navigation** (swipe left/right between pages) with
+  a tappable page-indicator.
 - **Compact sections** (Settings → Appearance, on by default) — flows whole
   sections into a responsive masonry so short sections sit side-by-side and fill
   the screen width, instead of each claiming a full-width band with a tall empty

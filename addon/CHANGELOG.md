@@ -1,4 +1,14 @@
 # Changelog
+## 1.0.2
+
+- **Phone navigation: swipe between pages.** In portrait on a phone the left
+  sidebar is hidden, which previously left no way to reach other pages. You can
+  now **swipe left/right** to move between pages, and a slim **page indicator**
+  at the bottom shows your position and lets you **tap a dot** to jump straight
+  to any page. Pages slide directionally as they change. The gesture is
+  phone-only, ignores horizontal carousels (so the scenes row still scrolls),
+  never interferes with vertical scrolling, and respects reduced-motion.
+
 ## 1.0.1
 
 - **Fixed layout export dropping edits.** Exporting your layout silently lost
