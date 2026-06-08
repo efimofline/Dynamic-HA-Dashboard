@@ -20,6 +20,8 @@ interface Props {
   getHistory?: (entityId: string, hours?: number) => Promise<number[]>;
   /** When set, a live camera thumbnail is shown in the tile's empty space. */
   cameraUrl?: string;
+  /** Optional custom MDI icon (e.g. "mdi-garage") overriding the domain default. */
+  icon?: string;
   /** Drag horizontally across the tile to dim the light (brightness shown as fill). */
   slideDim?: boolean;
   /** Reverse the cover position slider direction. */
@@ -87,10 +89,13 @@ function vacuumMapUrl(entities: HassEntities | undefined, base: string): string 
   return `${HA_URL}/api/camera_proxy/camera.${base}_map?token=${token}`;
 }
 
-export function DeviceTile({ entity, name, callHA, onToggle, onOpenDetail, span, tall, graph, getHistory, cameraUrl, slideDim, reverseSlider, mediaArtwork, artworkEntity, entities, enterIndex }: Props) {
+export function DeviceTile({ entity, name, callHA, onToggle, onOpenDetail, span, tall, graph, getHistory, cameraUrl, icon, slideDim, reverseSlider, mediaArtwork, artworkEntity, entities, enterIndex }: Props) {
   const id = entity.entity_id;
   const domain = id.split('.')[0];
   const active = isActiveState(entity.state);
+  // A custom per-tile icon overrides the domain/state default everywhere the
+  // tile draws its glyph.
+  const tileIcon = icon || entityIcon(id, entity.state);
 
   const brightness = entity.attributes.brightness as number | undefined;
   const dimmable = domain === 'light' && active && brightness != null;
@@ -383,7 +388,7 @@ export function DeviceTile({ entity, name, callHA, onToggle, onOpenDetail, span,
       >
         {!liveCamUrl && <div className="cover-fill" />}
         <div className="tile-top">
-          <span className={`mdi ${entityIcon(id, entity.state)} tile-icon`} />
+          <span className={`mdi ${tileIcon} tile-icon`} />
           <button
             className="tile-more"
             onClick={(e) => { e.stopPropagation(); onOpenDetail(id); }}
@@ -426,7 +431,7 @@ export function DeviceTile({ entity, name, callHA, onToggle, onOpenDetail, span,
           <Sparkline data={history} />
         </div>
         <div className="tile-top">
-          <span className={`mdi ${entityIcon(id, entity.state)} tile-icon`} />
+          <span className={`mdi ${tileIcon} tile-icon`} />
           <span className="graph-value">{entitySummary(entity)}</span>
         </div>
         <div className="tile-info">
@@ -482,7 +487,7 @@ export function DeviceTile({ entity, name, callHA, onToggle, onOpenDetail, span,
         </div>
       )}
       <div className="tile-top">
-        <span className={`mdi ${entityIcon(id, entity.state)} tile-icon ${warmIcon ? 'warm' : ''}`} />
+        <span className={`mdi ${tileIcon} tile-icon ${warmIcon ? 'warm' : ''}`} />
         <button
           className="tile-more"
           onClick={(e) => { e.stopPropagation(); openDetail(id); }}

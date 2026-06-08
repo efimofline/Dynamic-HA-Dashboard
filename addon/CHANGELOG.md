@@ -1,4 +1,12 @@
 # Changelog
+## 1.1.4
+
+- **Fixed: a custom tile icon now shows on the tile, not just in the editor.**
+  Picking an icon in a tile's settings saved correctly, but the rendered tile
+  kept showing the domain default because `DeviceTile` ignored the per-tile
+  `icon`. Tiles now honor a custom icon everywhere they're drawn (dashboard,
+  room views, and while editing/dragging).
+
 ## 1.1.3
 
 - **Fixed: camera tiles no longer spam Home Assistant with "invalid

@@ -264,6 +264,7 @@ function Tile({
       graph={view.kind === 'sensors' && domain === 'sensor'}
       getHistory={getHistory}
       cameraUrl={tileCameraUrl(entities, re.camera)}
+      icon={re.icon}
       slideDim={re.slideDim}
       reverseSlider={re.reverseSlider}
       mediaArtwork={re.mediaArtwork}
@@ -1015,6 +1016,7 @@ function EditableView(props: Props) {
                     onOpenDetail={() => {}}
                     graph={view.kind === 'sensors' && dm === 'sensor'}
                     getHistory={props.getHistory}
+                    icon={activeItem.re.icon}
                   />
                 </div>
               );
@@ -1148,6 +1150,7 @@ function SortableTile({
           onOpenDetail={onOpenSettings}
           graph={view.kind === 'sensors' && domain === 'sensor'}
           getHistory={getHistory}
+          icon={item.re.icon}
         />
       )}
       <div className="edit-tile-tools" onPointerDown={(e) => e.stopPropagation()}>

@@ -77,6 +77,7 @@ export function RoomPanel({ roomId, entities, onClose, onToggle, onOpenDetail, c
                     onToggle={onToggle}
                     onOpenDetail={onOpenDetail}
                     span={dimmable || isCover}
+                    icon={re.icon}
                   />
                 );
               })}

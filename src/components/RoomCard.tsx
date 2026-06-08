@@ -52,6 +52,7 @@ export function RoomCard({ room, entities, onToggle, onOpenDetail, onOpenRoom, c
               onOpenDetail={onOpenDetail}
               span={dimmable}
               tall={isCover || isVacuum}
+              icon={re.icon}
             />
           );
         })}
