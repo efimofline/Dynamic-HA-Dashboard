@@ -1,4 +1,15 @@
 # Changelog
+## 1.2.2
+
+- **Fixed: the screensaver showed other people's Plex streams (#31).** The
+  now-playing pill picked up any `media_player` reporting "playing" — including
+  the session entities the Plex integration creates for *remote* users
+  streaming from your server (the mystery "Twister"). Devices you've hidden on
+  the media page are now hidden from the screensaver too, and the exclusion
+  follows the whole device, so the fresh session entities Plex mints later
+  (`..._4`, `..._5`) stay hidden as well. If a ghost still appears, hide that
+  device once on the Media page (edit → eye icon) and it's gone everywhere.
+
 ## 1.2.1
 
 - **Fixed: dismissing the screensaver no longer presses what's underneath

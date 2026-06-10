@@ -250,3 +250,26 @@ export function applyMediaOverride(
   return next;
 }
 
+
+/**
+ * Expand a media-page exclude list to *every* entity of each excluded device
+ * (issue #31). Exclusions are stored as the entity ids that existed when the
+ * user hid the device, but some integrations mint new session entities later
+ * (Plex creates a fresh `media_player.plex_*_N` per client) — grouping by
+ * device name catches those, so a hidden device stays hidden everywhere
+ * (e.g. the screensaver's now-playing pill).
+ */
+export function expandedMediaExcludes(
+  players: HassEntity[],
+  exclude: string[],
+  merges: string[][] = [],
+): Set<string> {
+  const base = new Set(exclude);
+  const out = new Set(exclude);
+  for (const group of groupMediaPlayers(players, merges)) {
+    if (group.some((m) => base.has(m.entity_id))) {
+      for (const m of group) out.add(m.entity_id);
+    }
+  }
+  return out;
+}

@@ -4,6 +4,7 @@ import { resolveWeatherId, getWeatherIcon, getWeatherColor } from '../lib/weathe
 import { resolveArtwork } from '../lib/entityInfo';
 import { clockTime } from '../lib/format';
 import { eventTimeLabel, groupByDay, type CalendarEvent } from '../lib/calendar';
+import { expandedMediaExcludes } from '../lib/mediaDevices';
 
 interface Props {
   entities: HassEntities;
@@ -13,6 +14,12 @@ interface Props {
    *  onto the chosen page (e.g. Security). */
   shortcut?: { name: string; icon?: string };
   onShortcut?: () => void;
+  /** Devices hidden on the media page — also hidden from the now-playing pill
+   *  (issue #31: e.g. remote Plex friends' sessions). */
+  mediaExclude?: string[];
+  /** Manual device merges from the media page, so an exclusion covers every
+   *  entity of the merged device. */
+  mediaMerge?: string[][];
 }
 
 /** The playing media player to feature, if any — feeds the ambient art
@@ -20,9 +27,12 @@ interface Props {
  *  entities (Cast/ADB/...) where one carries the `media_title` and another the
  *  picture; prefer the title-carrier — resolveArtwork borrows companion art —
  *  and fall back to any picture-carrier. */
-function findPlaying(entities: HassEntities): HassEntity | undefined {
+function findPlaying(entities: HassEntities, excluded?: Set<string>): HassEntity | undefined {
   const playing = Object.values(entities).filter(
-    (e) => e.entity_id.startsWith('media_player.') && e.state === 'playing',
+    (e) =>
+      e.entity_id.startsWith('media_player.') &&
+      e.state === 'playing' &&
+      !excluded?.has(e.entity_id),
   );
   return (
     playing.find((e) => !!e.attributes.media_title) ??
@@ -48,7 +58,7 @@ const DRIFT_SPOTS: [number, number][] = [
  * art with a now-playing line. Any touch/movement wakes the dashboard (the
  * parent unmounts this via useIdle).
  */
-export function Screensaver({ entities, calendarEvents, shortcut, onShortcut }: Props) {
+export function Screensaver({ entities, calendarEvents, shortcut, onShortcut, mediaExclude, mediaMerge }: Props) {
   // The waking tap must only dismiss (#30). useIdle unmounts this overlay on
   // pointerdown, but on touch screens the gesture is still in flight — the
   // browser synthesizes the `click` after the finger lifts, and by then the
@@ -98,7 +108,12 @@ export function Screensaver({ entities, calendarEvents, shortcut, onShortcut }: 
   const weather = weatherId ? entities[weatherId] : undefined;
   const temp = weather?.attributes?.temperature as number | undefined;
 
-  const playing = useMemo(() => findPlaying(entities), [entities]);
+  const excluded = useMemo(() => {
+    if (!mediaExclude?.length) return undefined;
+    const players = Object.values(entities).filter((e) => e.entity_id.startsWith('media_player.'));
+    return expandedMediaExcludes(players, mediaExclude, mediaMerge);
+  }, [entities, mediaExclude, mediaMerge]);
+  const playing = useMemo(() => findPlaying(entities, excluded), [entities, excluded]);
   const artwork = playing
     ? resolveArtwork(playing, playing.entity_id, entities)
     : undefined;

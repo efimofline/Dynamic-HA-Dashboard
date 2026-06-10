@@ -461,12 +461,17 @@ export default function App() {
       {showScreensaver && (() => {
         // Configurable wake-onto-page shortcut (issue #28).
         const shortcutView = views.find((v) => v.id === getSettings().screensaverShortcut);
+        // Devices hidden on the media page stay hidden from the now-playing
+        // pill too (issue #31 — e.g. remote Plex friends' sessions).
+        const mediaViews = views.filter((v) => v.kind === 'media');
         return (
           <Screensaver
             entities={entities}
             calendarEvents={calendarEvents}
             shortcut={shortcutView ? { name: shortcutView.name, icon: shortcutView.icon } : undefined}
             onShortcut={shortcutView ? () => goToView(shortcutView.id) : undefined}
+            mediaExclude={mediaViews.flatMap((v) => v.mediaExclude ?? [])}
+            mediaMerge={mediaViews.flatMap((v) => v.mediaMerge ?? [])}
           />
         );
       })()}
