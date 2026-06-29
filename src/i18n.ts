@@ -7,7 +7,10 @@ const ru = {
   greeting_morning: 'Доброе утро',
   greeting_afternoon: 'Добрый день',
   greeting_evening: 'Добрый вечер',
-  greeting_media_playing: '{{count}} воспроизводится',
+  greeting_media_playing_one: '{{count}} воспроизводится',
+  greeting_media_playing_few: '{{count}} воспроизводятся',
+  greeting_media_playing_many: '{{count}} воспроизводятся',
+  greeting_media_playing_other: '{{count}} воспроизводятся',
   greeting_everything_quiet: 'Всё тихо',
   greeting_today: 'СЕГОДНЯ',
   weather_humidity: 'влажность',
@@ -75,7 +78,10 @@ const ru = {
   settings_screensaver: 'Заставка при бездействии',
   settings_screensaver_hint: 'Для настенных планшетов: после простоя панель переходит к затемнённым часам с датой, температурой и обложкой альбома. Нажмите в любом месте для пробуждения.',
   settings_screensaver_off: 'Выкл',
-  settings_screensaver_after: 'Через {{m}} мин',
+  settings_screensaver_after_one: 'Через {{count}} минуту',
+  settings_screensaver_after_few: 'Через {{count}} минуты',
+  settings_screensaver_after_many: 'Через {{count}} минут',
+  settings_screensaver_after_other: 'Через {{count}} минут',
   settings_screensaver_shortcut: 'Кнопка быстрого доступа на заставке',
   settings_screensaver_shortcut_hint: 'Показывает кнопку на заставке для перехода на эту страницу — например, камеры безопасности.',
   settings_screensaver_none: 'Нет',
@@ -399,6 +405,17 @@ const ru = {
   tile_vacuum_clean: 'Уборка',
   tile_vacuum_dock: 'Домой',
   tile_vacuum_batt: 'Акк.',
+
+  // Detail Panel — missing strings
+  detail_editing_flyout: 'Редакт. панель',
+  detail_vacuum_mode_vac_mop: 'Пылес. и мытьё',
+  detail_vacuum_mode_vac: 'Пылесос',
+  detail_vacuum_mode_mop: 'Мытьё',
+  detail_vacuum_mode_vac_then_mop: 'Пылес. → Мытьё',
+
+  // Language picker
+  settings_language: 'Язык интерфейса',
+  settings_language_hint: 'Изменение применяется сразу.',
 };
 
 const en: typeof ru = {
@@ -406,7 +423,10 @@ const en: typeof ru = {
   greeting_morning: 'Good morning',
   greeting_afternoon: 'Good afternoon',
   greeting_evening: 'Good evening',
-  greeting_media_playing: '{{count}} media playing',
+  greeting_media_playing_one: '{{count}} media playing',
+  greeting_media_playing_few: '{{count}} media playing',
+  greeting_media_playing_many: '{{count}} media playing',
+  greeting_media_playing_other: '{{count}} media playing',
   greeting_everything_quiet: 'Everything quiet',
   greeting_today: 'TODAY',
   weather_humidity: 'humidity',
@@ -471,7 +491,10 @@ const en: typeof ru = {
   settings_screensaver: 'Idle screensaver',
   settings_screensaver_hint: "For wall tablets: after sitting untouched, the dashboard drifts to a dimmed clock with the date, outside temperature, and ambient album art when music is playing. Tap anywhere to wake it.",
   settings_screensaver_off: 'Off',
-  settings_screensaver_after: 'After {{m}} minute{{s}} idle',
+  settings_screensaver_after_one: 'After {{count}} minute idle',
+  settings_screensaver_after_few: 'After {{count}} minutes idle',
+  settings_screensaver_after_many: 'After {{count}} minutes idle',
+  settings_screensaver_after_other: 'After {{count}} minutes idle',
   settings_screensaver_shortcut: 'Screensaver shortcut button',
   settings_screensaver_shortcut_hint: 'Show a button on the screensaver that wakes the dashboard straight onto this page — e.g. your security cameras.',
   settings_screensaver_none: 'None',
@@ -776,6 +799,17 @@ const en: typeof ru = {
   tile_vacuum_clean: 'Clean',
   tile_vacuum_dock: 'Dock',
   tile_vacuum_batt: 'Batt.',
+
+  // Detail Panel — missing strings
+  detail_editing_flyout: 'Editing flyout',
+  detail_vacuum_mode_vac_mop: 'Vac & Mop',
+  detail_vacuum_mode_vac: 'Vac',
+  detail_vacuum_mode_mop: 'Mop',
+  detail_vacuum_mode_vac_then_mop: 'Vac → Mop',
+
+  // Language picker
+  settings_language: 'Interface language',
+  settings_language_hint: 'Takes effect immediately.',
 };
 
 i18n.use(initReactI18next).init({
@@ -785,7 +819,11 @@ i18n.use(initReactI18next).init({
   },
   lng: localStorage.getItem('ha-dashboard-lang') ?? 'en',
   fallbackLng: 'en',
-  interpolation: { escapeValue: false },
+  interpolation: {
+    // Safe: all t() output goes through React text nodes, never dangerouslySetInnerHTML.
+    // React handles HTML escaping, so disabling i18next's own escaping avoids double-encoding.
+    escapeValue: false,
+  },
 });
 
 export default i18n;

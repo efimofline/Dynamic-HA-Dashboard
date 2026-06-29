@@ -38,7 +38,7 @@ function getHomeNames(entities: HassEntities): string[] {
 }
 
 export function Header({ entities, getForecast, hideGreeting, hideWeather, hidePeople }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const greeting = (() => {
     const h = new Date().getHours();
     if (h < 5) return t('greeting_night');
@@ -97,7 +97,7 @@ export function Header({ entities, getForecast, hideGreeting, hideWeather, hideP
               ? t('greeting_media_playing', { count: mediaPlaying.length })
               : t('greeting_everything_quiet')}
             {' · '}
-            {new Date().toLocaleDateString('ru-RU', { weekday: 'long', month: 'short', day: 'numeric' })}
+            {new Date().toLocaleDateString(i18n.language, { weekday: 'long', month: 'short', day: 'numeric' })}
           </p>
         </div>
       ) : (
@@ -124,7 +124,7 @@ export function Header({ entities, getForecast, hideGreeting, hideWeather, hideP
                   <div className="dow">
                     {i === 0
                       ? t('greeting_today')
-                      : new Date(d.datetime).toLocaleDateString('ru-RU', { weekday: 'short' }).toUpperCase()}
+                      : new Date(d.datetime).toLocaleDateString(i18n.language, { weekday: 'short' }).toUpperCase()}
                   </div>
                   <span className={`mdi ${getWeatherIcon(d.condition)}`} style={{ fontSize: 20, color: getWeatherColor(d.condition) }} />
                   <div className="temp">

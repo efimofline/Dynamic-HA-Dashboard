@@ -37,7 +37,7 @@ type TestState = 'idle' | 'testing' | 'ok' | 'fail';
 
 export function SettingsModal({ onClose, entities, views, onResetLayout, onStartBlank, onExportLayout, onImportLayout }: Props) {
   const initial = getSettings();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [haUrl, setHaUrl] = useState(initial.haUrl);
   const [haToken, setHaToken] = useState(initial.haToken);
   const [showToken, setShowToken] = useState(false);
@@ -59,6 +59,13 @@ export function SettingsModal({ onClose, entities, views, onResetLayout, onStart
   const [smartGrouping, setSmartGrouping] = useState(initial.smartGrouping);
   const [test, setTest] = useState<TestState>('idle');
   const [testMsg, setTestMsg] = useState('');
+  const [lang, setLang] = useState(() => localStorage.getItem('ha-dashboard-lang') ?? 'en');
+
+  const pickLang = (l: string) => {
+    setLang(l);
+    i18n.changeLanguage(l);
+    localStorage.setItem('ha-dashboard-lang', l);
+  };
 
   const weatherOptions = weatherEntities(entities);
   const calendarOptions = discoverCalendars(entities);
@@ -376,6 +383,16 @@ export function SettingsModal({ onClose, entities, views, onResetLayout, onStart
                 <span className="ts-switch-knob" />
               </button>
             </label>
+            <label className="ts-field">
+              <span>{t('settings_language')}</span>
+              <select value={lang} onChange={(e) => pickLang(e.target.value)}>
+                <option value="en">English</option>
+                <option value="ru">Русский</option>
+              </select>
+              <small className="settings-hint">
+                {t('settings_language_hint')}
+              </small>
+            </label>
             <label className="ts-field settings-weather-field">
               <span>{t('settings_weather_entity')}</span>
               <select
@@ -383,7 +400,7 @@ export function SettingsModal({ onClose, entities, views, onResetLayout, onStart
                 onChange={(e) => setWeatherEntity(e.target.value)}
               >
                 <option value="">
-                  {t('settings_weather_auto')}{weatherOptions[0] ? ` (${weatherOptions[0].entity_id})` : ' (none found)'}
+                  {t('settings_weather_auto')}{weatherOptions[0] ? ` (${weatherOptions[0].entity_id})` : ` (${t('settings_weather_none')})`}
                 </option>
                 {weatherOptions.map((w) => (
                   <option key={w.entity_id} value={w.entity_id}>
@@ -405,8 +422,7 @@ export function SettingsModal({ onClose, entities, views, onResetLayout, onStart
                 ))}
               </select>
               <small className="settings-hint">
-                How timestamps (e.g. a NOC node&apos;s "last boot") display. Always shown
-                in <strong>this device&apos;s timezone</strong>.
+                {t('settings_date_format_hint')}
               </small>
             </label>
             <label className="ts-toggle-field">
@@ -466,7 +482,7 @@ export function SettingsModal({ onClose, entities, views, onResetLayout, onStart
                 <option value={0}>{t('settings_screensaver_off')}</option>
                 {[1, 2, 5, 10, 15, 30].map((m) => (
                   <option key={m} value={m}>
-                    {t('settings_screensaver_after', { m, s: m > 1 ? 's' : '' })}
+                    {t('settings_screensaver_after', { count: m })}
                   </option>
                 ))}
               </select>

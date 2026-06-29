@@ -99,7 +99,7 @@ export function DetailPanel({
           <>
             <div className="detail-header">
               <h2>{name}</h2>
-              {editing && <span className="flyout-edit-badge"><span className="mdi mdi-pencil" /> Editing flyout</span>}
+              {editing && <span className="flyout-edit-badge"><span className="mdi mdi-pencil" /> {t('detail_editing_flyout')}</span>}
               <button className="detail-close" onClick={onClose}>
                 <span className="mdi mdi-close" />
               </button>
@@ -711,10 +711,10 @@ function VacuumDetail({ entity, entityId, callHA, entities }: EntityProps & { en
   // present) rather than the `select.<base>_cleaning_mode` entity, which the
   // integration reports as `unavailable` whenever the mop pad isn't mounted.
   const MODE_LABELS: Record<string, string> = {
-    'Sweeping and mopping': 'Vac & Mop',
-    'Sweeping': 'Vac',
-    'Mopping': 'Mop',
-    'Mopping after sweeping': 'Vac → Mop',
+    'Sweeping and mopping': t('detail_vacuum_mode_vac_mop'),
+    'Sweeping': t('detail_vacuum_mode_vac'),
+    'Mopping': t('detail_vacuum_mode_mop'),
+    'Mopping after sweeping': t('detail_vacuum_mode_vac_then_mop'),
   };
   const MODE_ORDER = ['Sweeping and mopping', 'Sweeping', 'Mopping', 'Mopping after sweeping'];
   const modes = [...modeList].sort((x, y) => MODE_ORDER.indexOf(x) - MODE_ORDER.indexOf(y));
